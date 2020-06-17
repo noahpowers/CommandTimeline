@@ -40,10 +40,6 @@ class Command(object):
 
         for index in range(len(temp)):
 
-            if previous_skip:
-                previous_skip = False
-                continue
-
             if index == 0:
                 self.date = temp[0]
             elif index == 1:
@@ -52,7 +48,7 @@ class Command(object):
 
                 # Avoid storing skips as tools
                 for skip in skips:
-                    if re.search(skip , temp[2].lower()) and len(temp) > 3:
+                    if re.search(skip, temp[2].lower()) and len(temp) > 3:
                         temp[3] = temp[3].lstrip("\"")
                         temp[3] = temp[3].rstrip("\"")
                         self.tool = temp[3]
@@ -61,6 +57,10 @@ class Command(object):
                         temp[2] = temp[2].lstrip("\"")
                         temp[2] = temp[2].rstrip("\"")
                         self.tool = temp[2]
+
+                    if previous_skip:
+                        previous_skip = False
+                        break
             else:
                 if index == len(temp)-1:
                     temp[index] = temp[index].rstrip('\"')
