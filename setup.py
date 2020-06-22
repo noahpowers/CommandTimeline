@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='CommandTimeLiner',
+    name='CommandHistory',
     version='',
     packages=['lib', 'lib.db', 'lib.core', 'lib.controller'],
     url='',
