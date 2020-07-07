@@ -3,8 +3,10 @@
 
 from lib.models.command import Command
 from lib.db.persist import Persist
+from lib.db.storage import Storage
 from lib.utils.utiliites import Redactor
 import os
+import sys
 
 class Controller(object):
 
@@ -13,6 +15,7 @@ class Controller(object):
         self.history = arguments.input
         self.commands = []
         self.path = path
+        self.storage = None
 
         if self.arguments.unpack is False:
             self.GenerateFromHistory()
@@ -24,6 +27,12 @@ class Controller(object):
             self.PersistDatabase()
         else:
             self.UnpackData()
+
+    """ Debug Mode """
+    def debug(self):
+        self.storage = Storage(self.path, self)
+        self.storage.init()
+        self.storage.revo()
 
     # Generates command objects using history file
     def GenerateFromHistory(self):
