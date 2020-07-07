@@ -18,6 +18,7 @@ class Storage(object):
         self.user = user
         self.database_user = "chu"
         self.database_password = None
+        self.busy = False
 
         self.postgres_cursor = None
         self.command_cursor = None
@@ -33,14 +34,14 @@ class Storage(object):
             else:
                 print("[!] Password Needed to Connect to Database ! ")
 
-        if not self.test_connection():
+        if not self.testConnection():
             print("[*] Check Credentials !")
 
         print("[*] Database Connected !")
         time.sleep(1)
 
     """ Creates Database User """
-    def create_user(self):
+    def createUser(self):
 
         while True:
             password = getpass.getpass("[?] Database Account Password: ")
@@ -72,7 +73,7 @@ class Storage(object):
         return True
 
     """ Test Initial Server Configurations """
-    def test_connection(self):
+    def testConnection(self):
         """ If Database service is running and connection returns logged in"""
         status_check = subprocess.call(["service", "postgresql", "status"], stdout=subprocess.DEVNULL)
 
@@ -85,18 +86,17 @@ class Storage(object):
             except psycopg2.OperationalError:
                 print("[*] Creating database user !")
                 time.sleep(1)
-                self.create_user()
+                self.createUser()
 
             try:
                 self.command_cursor = psycopg2.connect(user=self.database_user,
                                                        password=self.database_password, host="127.0.0.1",
                                                        dbname="commandhistory").cursor()
-                self.check_table()
+                self.checkTable()
             except psycopg2.OperationalError:
                 print("[*] Initializing Database !")
                 time.sleep(1)
                 self.create_database()
-
 
             return True
         else:
@@ -108,7 +108,7 @@ class Storage(object):
 
         try:
             self.command_cursor = psycopg2.connect(user=self.database_user, password=self.database_password, host='127.0.0.1', dbname="commandhistory").cursor()
-            self.check_table()
+            self.checkTable()
             return
         except psycopg2.OperationalError:
             print("[*] Creating Database !")
@@ -123,9 +123,9 @@ class Storage(object):
             self.postgres_cursor.execute(command)
             print("[*] Database Created !")
             time.sleep(1)
-            self.check_table()
+            self.checkTable()
         except psycopg2.ProgrammingError:
-            self.check_table()
+            self.checkTable()
             return True
         except psycopg2.OperationalError:
             self.postgres_cursor.execute("rollback;")
@@ -134,7 +134,7 @@ class Storage(object):
         return
 
     """ Check Tables """
-    def check_table(self):
+    def checkTable(self):
 
         s = " select table_schema, table_name "
         s += "from information_schema.tables where "
@@ -155,15 +155,15 @@ class Storage(object):
                     return True
             else:
                 print("[*] Creating Tables ")
-                self.create_tables()
+                self.createTables()
         except psycopg2.OperationalError:
             self.command_cursor.execute('rollback;')
             print("[*] Creating Tables ")
             time.sleep(1)
-            self.create_tables()
+            self.createTables()
 
     """ Creates Tables in Database """
-    def create_tables(self):
+    def createTables(self):
 
         s = "CREATE TABLE command ( timestamp text, command text, arguments text, raw text )"
 
@@ -179,8 +179,6 @@ class Storage(object):
             print("[*] Table Already Exists !")
             return True
 
-    def append(self):
-        pass
 
     """ Fetches all Records from Database """
     def fetch(self):
@@ -206,7 +204,7 @@ class Storage(object):
             self.user.commands.append(Command(base64.b64decode(stored_command[0].encode()).decode()))
 
     """ Decode Commands """
-    def command_decoder(self, commands):
+    def commandDecoder(self, commands):
 
         cache = []
 
@@ -237,7 +235,7 @@ class Storage(object):
         return command
 
     """ Commands may need to be base64 encoded before storing into database """
-    def encoded_commands(self, commands):
+    def encodeCommands(self, commands):
 
         cache = []
         for command in commands:
@@ -247,7 +245,7 @@ class Storage(object):
         return cache
 
     """ Inserts Commands into Table """
-    def insert_row(self, commands):
+    def insertRows(self, commands):
 
         for command in commands:
             command = self.clean(command)
@@ -256,7 +254,4 @@ class Storage(object):
 
             self.command_cursor.execute('rollback;')
             self.command_cursor.execute(s)
-
-    def store(self):
-        pass
 
