@@ -1,5 +1,2 @@
-<<<<<<< HEAD
 psycopg2-binary==2.8.5
-=======
->>>>>>> b0a9da9c1499b0491f56eb45f1373b4f06ba8ff8
 python-magic==0.4.18

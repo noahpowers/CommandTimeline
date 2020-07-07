@@ -73,7 +73,6 @@ class Persist(object):
         return
 
     # Unpacks selected database to add to another
-<<<<<<< HEAD
     def unpack_database(self, filename=None):
 
         if filename:
@@ -81,11 +80,6 @@ class Persist(object):
         else:
             db_unpack = sqlite3.connect(self.arguments.input)
 
-=======
-    def unpack_database(self):
-
-        db_unpack = sqlite3.connect(self.arguments.input)
->>>>>>> b0a9da9c1499b0491f56eb45f1373b4f06ba8ff8
         c = db_unpack.cursor()
 
         temp = []
