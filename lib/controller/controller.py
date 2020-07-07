@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Controls Program Flow and population of model data
-from lib.models.server.server import Server
+from lib.models.server.server import ServerMode
 from lib.models.command import Command
 from lib.db.persist import Persist
 from lib.db.storage import Storage
@@ -15,9 +15,13 @@ class Controller(object):
         self.commands = []
         self.path = path
         self.storage = None
+        self.user = self
 
         if self.arguments.server:
-            machine = Server(self.path, self)
+            self.storage = Storage(self.path, self)
+            self.storage.init()
+            # ServerMode() - For some reason its not reading my class file
+
         else:
             self.history = arguments.input
 
@@ -31,12 +35,6 @@ class Controller(object):
                 self.PersistDatabase()
             else:
                 self.UnpackData()
-
-    """ Debug Mode """
-    def debug(self):
-        self.storage = Storage(self.path, self)
-        self.storage.init()
-        self.storage.revo()
 
     # Generates command objects using history file
     def GenerateFromHistory(self):

@@ -14,7 +14,8 @@ job_queue = []
 busy = False
 
 """ Defines the Server Instance """
-class Server(object):
+class ServerMode(object):
+
     def __int__(self, path, user):
 
         global app
@@ -66,6 +67,7 @@ class Server(object):
     @app.route ("/push-history", methods=["POST"])
     def postFile(self):
 
+        print("[*] Incoming File ")
         """ If FIle is Sent Over """
         if request.method == "POST":
             if 'file' not in request.files:
