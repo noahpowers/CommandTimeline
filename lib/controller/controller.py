@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Controls Program Flow and population of model data
-
+from lib.models.server.server import Server
 from lib.models.command import Command
 from lib.db.persist import Persist
 from lib.db.storage import Storage
@@ -12,21 +12,25 @@ class Controller(object):
 
     def __init__(self, path, arguments):
         self.arguments = arguments
-        self.history = arguments.input
         self.commands = []
         self.path = path
         self.storage = None
 
-        if self.arguments.unpack is False:
-            self.GenerateFromHistory()
-            Redactor(self.path, self.commands)
-
-            for command in self.commands:
-                command.redact_raw_command()
-
-            self.PersistDatabase()
+        if self.arguments.server:
+            machine = Server(self.path, self)
         else:
-            self.UnpackData()
+            self.history = arguments.input
+
+            if self.arguments.unpack is False:
+                self.GenerateFromHistory()
+                Redactor(self.path, self.commands)
+
+                for command in self.commands:
+                    command.redact_raw_command()
+
+                self.PersistDatabase()
+            else:
+                self.UnpackData()
 
     """ Debug Mode """
     def debug(self):
@@ -68,15 +72,20 @@ class Controller(object):
         database.persist()
         return
 
+
     # Take DB file and unpack
-    def UnpackData(self):
+    def UnpackData(self, filename=None):
 
         database = Persist(self.path,self.arguments)
         temp = database.unpack_database()
         self.arguments.unpack = False
 
         self.GenerateFromDatabase(temp)
-        self.PersistDatabase()
+
+        if filename:
+            Storage(self.path, self).insertRows(self.commands)
+        else:
+            self.PersistDatabase()
 
         return
 
