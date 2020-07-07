@@ -15,11 +15,15 @@ class Arguments(object):
         ####################
         # Configure Required
         ####################
+        if options.server:
+            self.server = True
+            return
+        else:
+            self.server = False
 
         if options.input is None:
             print('Usage: ./command-time-liner.py [-i|--input] [options]')
             sys.exit()
-
 
         self.input = options.input
         self.unpack = self.check_input_file()
@@ -29,6 +33,7 @@ class Arguments(object):
         ####################
 
         self.db_file = options.db_file
+
 
 
     def ParseOptions(self):
@@ -46,13 +51,14 @@ class Arguments(object):
         optional.add_option("--db-file",help="Specify Database Filename", action="store", type="string",
                             dest="db_file", default="archive.db")
 
-        # Server Mode Settings [ NOT ADDED YET ]
+        # Server Mode Settings
         server = OptionGroup(parser, "Server")
-        server.add_option("--server", help="Configures Server using POSTGRESQL", action="store_true", dest="server_mode")
+        server.add_option("--server", help="Configures Server using POSTGRESQL", action="store_true", dest="server")
         server.add_option("--port", help="Port to run service on, default is 5000", action="store", type="int", dest="port")
 
         parser.add_option_group(required)
         parser.add_option_group(optional)
+        parser.add_option_group(server)
 
         options, arguments = parser.parse_args()
 
