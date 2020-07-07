@@ -46,6 +46,11 @@ class Arguments(object):
         optional.add_option("--db-file",help="Specify Database Filename", action="store", type="string",
                             dest="db_file", default="archive.db")
 
+        # Server Mode Settings [ NOT ADDED YET ]
+        server = OptionGroup(parser, "Server")
+        server.add_option("--server", help="Configures Server using POSTGRESQL", action="store_true", dest="server_mode")
+        server.add_option("--port", help="Port to run service on, default is 5000", action="store", type="int", dest="port")
+
         parser.add_option_group(required)
         parser.add_option_group(optional)
 
