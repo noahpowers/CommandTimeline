@@ -73,9 +73,13 @@ class Persist(object):
         return
 
     # Unpacks selected database to add to another
-    def unpack_database(self):
+    def unpack_database(self, filename=None):
 
-        db_unpack = sqlite3.connect(self.arguments.input)
+        if filename:
+            db_unpack = sqlite3.connect(self.path + "uploads/%s" %filename)
+        else:
+            db_unpack = sqlite3.connect(self.arguments.input)
+
         c = db_unpack.cursor()
 
         temp = []
