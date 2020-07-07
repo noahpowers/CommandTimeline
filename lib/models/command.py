@@ -11,15 +11,21 @@ class Command(object):
         self.date = None
         self.time = None
         self.time_stamp = None
+<<<<<<< HEAD
         self.argument_string = None
+=======
+>>>>>>> b0a9da9c1499b0491f56eb45f1373b4f06ba8ff8
         self.parser()
 
         self.convertDate()
 
+<<<<<<< HEAD
     """ Printing the Items """
     def __repr__(self):
         return self.raw_command
 
+=======
+>>>>>>> b0a9da9c1499b0491f56eb45f1373b4f06ba8ff8
     """ Convert Date """
     def convertDate(self):
 
