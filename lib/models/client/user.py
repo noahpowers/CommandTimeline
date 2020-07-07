@@ -13,10 +13,7 @@ class User(object):
     def __repr__(self):
         pass
 
-    def password_generator(self, password):
-        self.password = Utility.hash_generator(password)
-
-    def create_user(self):
+    def create(self):
 
         while True:
 
@@ -37,7 +34,7 @@ class User(object):
                         if temporary_password != confirm_password:
                             print("[!] Passwords Do Not Match")
                         else:
-                            self.password_generator(temporary_password)
+                            self.password = Utility.hash_generator(temporary_password)
                             break
                     else:
                         print("[!] Enter Password!")
@@ -69,10 +66,10 @@ class User(object):
                 else:
                     break
 
-    def delete_user(self):
+    def delete(self):
         pass
 
-    def update_user(self):
+    def update(self):
         pass
 
 
