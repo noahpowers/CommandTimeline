@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import os
+import sys
 import sqlite3
 from sys import exit
 from shutil import copyfile
 
 class Persist(object):
 
-    def __init__(self, path, arguments):
+    def __init__(self, path, arguments, filename=None):
 
         # Pass arguments to retrieve specified options
         # Pass Path around just in case something needs to be accessed from project directory
@@ -14,10 +16,12 @@ class Persist(object):
         self.arguments = arguments
         self.path = path
         self.db = None
-        self.table_name = "CommandHistory"
 
-        if self.arguments.unpack is False:
-            self.load()
+        if filename:
+            self.load(filename=filename)
+        else:
+            if self.arguments.unpack is False or filename:
+                self.load()
 
     # Insert Command Data
     def insert_row(self, command):
@@ -26,7 +30,7 @@ class Persist(object):
 
         # Insert Row
         try:
-            c.execute('''INSERT INTO CommandHistory VALUES ('%s','%s','%s', '%s')
+            c.execute('''INSERT INTO command VALUES ('%s','%s','%s', '%s')
                       '''%(command.time_stamp, command.tool, " ".join(command.arguments), command.raw_command))
         except sqlite3.OperationalError:
             pass
@@ -35,8 +39,17 @@ class Persist(object):
         return
 
     # Load database file
-    def load(self):
-        self.db = sqlite3.connect(self.arguments.db_file)
+    def load(self, filename=None):
+
+        if filename:
+            self.db = sqlite3.connect(self.path + "/uploads/" + filename)
+
+        else:
+            if not os.path.exists(self.path + "/archives"):
+                os.makedirs(self.path + "/archives")
+
+            self.db = sqlite3.connect(self.path + "/archives/" + self.arguments.db_file)
+
         return
 
     # Create Database
@@ -45,12 +58,7 @@ class Persist(object):
         c = self.db.cursor()
 
         # Create table
-        c.execute('''CREATE TABLE CommandHistory( 
-                     TimeStamp text, 
-                     Command text, 
-                     Arguments text,
-                     Raw text            
-                                     )''')
+        c.execute('''CREATE TABLE command ( timestamp text, command text, arguments text, raw text   )''')
         return
 
     # Check instance
@@ -61,7 +69,7 @@ class Persist(object):
         else:
             c = database.cursor()
 
-        for row in c.execute('SELECT name FROM sqlite_master WHERE name="%s"' %self.table_name):
+        for row in c.execute('select name from sqlite_master where name="command";'):
             if bool(row):
                 return True
 
@@ -73,28 +81,30 @@ class Persist(object):
         return
 
     # Unpacks selected database to add to another
-    def unpack_database(self, filename=None):
+    def unpack_database(self, filename=None, server=False):
 
         if filename:
-            db_unpack = sqlite3.connect(self.path + "uploads/%s" %filename)
+            location = str(self.path + "/uploads/" + filename)
+            db_unpack = sqlite3.connect(location)
         else:
             db_unpack = sqlite3.connect(self.arguments.input)
 
-        c = db_unpack.cursor()
-
         temp = []
-
         if self.check_table(database=db_unpack):
-            for row in c.execute('SELECT Raw FROM CommandHistory'):
+            c = db_unpack.cursor()
+            for row in c.execute('SELECT raw FROM command'):
                 if bool(row):
                     temp.append(list(row))
         else:
-            print("Ingested Database is not initialized")
-            exit()
+            if server:
+                return False
+            else:
+                print("Ingested Database is not initialized")
+                exit()
 
         return temp
 
   # Backup archive file being reading and writing
     def backup_archive(self):
-        copyfile(self.arguments.db_file, self.path + "/%s.backup" % self.arguments.db_file)
+        copyfile(self.path + "/archives/%s" %self.arguments.db_file, self.path + "/archives/%s.backup" % self.arguments.db_file)
         return

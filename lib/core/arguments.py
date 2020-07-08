@@ -18,12 +18,13 @@ class Arguments(object):
         if options.server:
             self.server = True
             return
+
         else:
             self.server = False
 
-        if options.input is None:
-            print('Usage: ./command-time-liner.py [-i|--input] [options]')
-            sys.exit()
+            if options.input is None:
+                print('Usage: ./command-time-liner.py [-i|--input] [options]')
+                sys.exit()
 
         self.input = options.input
         self.unpack = self.check_input_file()
@@ -33,8 +34,6 @@ class Arguments(object):
         ####################
 
         self.db_file = options.db_file
-
-
 
     def ParseOptions(self):
 
