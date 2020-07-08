@@ -8,25 +8,29 @@ from lib.utils.utiliites import Redactor
 import os
 import sys
 
+
 class Controller(object):
 
     def __init__(self, path, arguments):
+
         self.arguments = arguments
         self.commands = []
         self.path = path
         self.storage = None
-        self.user = self
 
         if self.arguments.server:
             self.storage = Storage(self.path, self)
             self.storage.init()
-            # ServerMode() - For some reason its not reading my class file
+
+            self.server = ServerMode(self.path, self)
+            self.server.path = self.path
+            self.server.start()
 
         else:
             self.history = arguments.input
 
             if self.arguments.unpack is False:
-                self.GenerateFromHistory()
+                self.GenerateFromHistoryFile()
                 Redactor(self.path, self.commands)
 
                 for command in self.commands:
@@ -37,7 +41,7 @@ class Controller(object):
                 self.UnpackData()
 
     # Generates command objects using history file
-    def GenerateFromHistory(self):
+    def GenerateFromHistoryFile(self):
 
         temp = open(self.history, "r").readlines()
 
@@ -55,9 +59,8 @@ class Controller(object):
     # Saves command objects to SQLite3 file
     def PersistDatabase(self):
 
-        database = Persist(self.path,self.arguments)
-
-        if os.path.isfile(self.arguments.db_file):
+        database = Persist(self.path, self.arguments)
+        if os.path.isfile(self.path + "/archives/" + self.arguments.db_file):
             if database.check_table() is False:
                 database.creation()
             else:
@@ -66,17 +69,26 @@ class Controller(object):
         for command in self.commands:
             if command is not None:
                 database.insert_row(command)
+            database.persist()
 
-        database.persist()
         return
-
 
     # Take DB file and unpack
     def UnpackData(self, filename=None):
 
-        database = Persist(self.path,self.arguments)
-        temp = database.unpack_database()
+        if filename:
+            database = Persist(self.path, self.arguments, filename=filename)
+            temp = database.unpack_database(filename=filename, server=True)
+
+        else:
+            database = Persist(self.path, arguments=self.arguments)
+            temp = database.unpack_database(filename=filename)
+
         self.arguments.unpack = False
+
+        if not temp:
+            self.server.busy = False
+            return
 
         self.GenerateFromDatabase(temp)
 
