@@ -48,7 +48,8 @@ The basic gist of the tool is simple.
 
 1. Update command-timeline.py file with the path to the combined history file (line #18)
 
-1. Run: `python3 command-timeline.py`
+1. Run: `python3 command_history.py --transform <history_file>` -> Generates the edited_history file for archiving
+2. Run: `python3 command_history.py --input <edited_history>` -> Stores the data in a sqlite3 database file under 'archive' directory
 
 ## Storing CommandTimeline archive in database
 
