@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from optparse import OptionParser, OptionGroup
+from lib.utils.transform import Transform
 import magic
 import re
 import sys
@@ -22,8 +23,12 @@ class Arguments(object):
         else:
             self.server = False
 
-            if options.input is None:
+            if options.input is None and options.transform is None:
                 print('Usage: ./command-time-liner.py [-i|--input] [options]')
+                sys.exit()
+
+            if options.transform:
+                Transform(options.transform)
                 sys.exit()
 
         self.input = options.input
@@ -49,6 +54,8 @@ class Arguments(object):
         optional = OptionGroup(parser, "Optional")
         optional.add_option("--db-file",help="Specify Database Filename", action="store", type="string",
                             dest="db_file", default="archive.db")
+        optional.add_option("--transform", help="Transform history to archival format", action="store", type="string",
+                            dest="transform")
 
         # Server Mode Settings
         server = OptionGroup(parser, "Server")
