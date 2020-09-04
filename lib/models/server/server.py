@@ -2,6 +2,7 @@ from lib.models.globals import ServerGlobals
 from werkzeug.utils import secure_filename
 from flask import request, jsonify
 import shutil
+import queue
 import threading
 import logging
 import flask
@@ -20,6 +21,8 @@ program_path = None
 busy = False
 file = None
 
+# Implementing this at some point better handles threads
+# queue = queue.Queue()
 
 """ Defines the Server Instance """
 class ServerMode():
@@ -50,6 +53,30 @@ class ServerMode():
         pass
 
 
+""" Retrieves the Request From the Server """
+def porter(request):
+    """ Check If Proper Method is Sent """
+    if request.method == "POST":
+        if 'file' not in request.files:
+            flask.flash("No File Data")
+           # return flask.redirect(request.url)
+            return flask.get_flashed_messages()
+        if request.args.get("uploadFile"):
+
+            if request.args["uploadFile"] == "true":
+                file_upload = request.files["file"]
+            else:
+                return jsonify({400: "Invalid Parameters"})
+
+            if file_upload:
+                if process(file_upload):
+                    return jsonify({200: "Success"})
+                else:
+                    return jsonify({400: "File Not Uploaded"})
+        else:
+            return jsonify({400: "Invalid"})
+    pass
+
 """ Watches the uploads directory to process and add files"""
 def work(user):
     if not os.path.exists(program_path + "/uploads"):
@@ -72,20 +99,22 @@ def work(user):
         else:
             time.sleep(5)
 
+
 """ Retrieves the posted file """
 @app.route("/pushHistory", methods=["POST"])
 def postFile():
+
     """ If FIle is Sent Over """
     if request.method == "POST":
         if 'file' not in request.files:
             flask.flash("No File Data")
             return flask.redirect(request.url)
-        if request.args.get("uploadFile"):
 
+        if request.args.get("uploadFile"):
             if request.args["uploadFile"] == "true":
                 file_upload = request.files["file"]
             else:
-                return jsonify({400 : "Invalid Parameters"})
+                return jsonify({400: "Invalid Parameters"})
 
             if file_upload:
                 if process(file_upload):
@@ -123,7 +152,6 @@ def process(file_upload):
 
     if file_upload and allowed_file(file_upload.filename):
         if checkFileType(file_upload):
-
             #file_upload.save(os.path.join(app.config['UPLOAD_FOLDER'], file_upload.filename))
             job_queue.append(file_upload.filename)
             return True
